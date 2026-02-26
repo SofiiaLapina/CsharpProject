@@ -8,4 +8,10 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\StudyManager.Presentation\StudyManager.Presentation.csproj" />
+    <ProjectReference Include="..\StudyManager.Services\StudyManager.Services.csproj" />
+    <ProjectReference Include="..\StudyManager.Storage\StudyManager.Storage.csproj" />
+  </ItemGroup>
+
 </Project>
