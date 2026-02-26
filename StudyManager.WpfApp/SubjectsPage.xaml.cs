@@ -1,26 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Windows;
+﻿using StudyManager.Presentation;
+using StudyManager.Services;
+using System.Linq;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
-namespace StudyManager.WpfApp
+namespace StudyManager.WpfApp;
+
+public partial class SubjectsPage : Page
 {
-    /// <summary>
-    /// Логика взаимодействия для SubjectsPage.xaml
-    /// </summary>
-    public partial class SubjectsPage : Page
+    private readonly IStorageService _storageService;
+
+    public SubjectsPage(IStorageService storageService)
     {
-        public SubjectsPage()
+        InitializeComponent();
+        _storageService = storageService;
+        LoadData();
+    }
+
+    private void LoadData()
+    {
+        var subjects = _storageService.GetSubjects()
+            .Select(s => new SubjectViewModel(s))
+            .ToList();
+        SubjectsList.ItemsSource = subjects;
+    }
+
+    private void SubjectsList_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (SubjectsList.SelectedItem is SubjectViewModel selectedSubject)
         {
-            InitializeComponent();
+            NavigationService.Navigate(new SubjectDetailsPage(_storageService, selectedSubject));
         }
     }
 }
