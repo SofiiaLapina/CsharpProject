@@ -1,26 +1,35 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using StudyManager.Presentation;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
-namespace StudyManager.WpfApp
+namespace StudyManager.WpfApp;
+
+public partial class LessonDetailsPage : Page
 {
-    /// <summary>
-    /// Логика взаимодействия для LessonDetailsPage.xaml
-    /// </summary>
-    public partial class LessonDetailsPage : Page
+    public LessonDetailsPage(LessonViewModel lesson)
     {
-        public LessonDetailsPage()
+        InitializeComponent();
+        LoadLessonDetails(lesson);
+    }
+
+    private void LoadLessonDetails(LessonViewModel lesson)
+    {
+        TopicText.Text = $"Topic: {lesson.Topic}";
+        DateText.Text = $"Date: {lesson.Date:yyyy-MM-dd}";
+
+        string durationStr = lesson.Duration.Hours > 0
+            ? $"{lesson.Duration.Hours}h {lesson.Duration.Minutes}m"
+            : $"{lesson.Duration.Minutes}m";
+
+        TimeText.Text = $"Time: {lesson.StartTime:HH:mm} - {lesson.EndTime:HH:mm} (Duration: {durationStr})";
+        TypeText.Text = $"Type: {lesson.Type}";
+    }
+
+    private void BackButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (NavigationService.CanGoBack)
         {
-            InitializeComponent();
+            NavigationService.GoBack();
         }
     }
 }

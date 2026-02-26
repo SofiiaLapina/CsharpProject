@@ -1,8 +1,7 @@
 ﻿<Application x:Class="StudyManager.WpfApp.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:StudyManager.WpfApp"
-             StartupUri="MainWindow.xaml">
+             xmlns:local="clr-namespace:StudyManager.WpfApp">
     <Application.Resources>
          
     </Application.Resources>
