@@ -5,10 +5,9 @@ namespace StudyManager.WpfApp;
 
 public partial class MainWindow : Window
 {
-    public MainWindow(IStorageService storageService)
+    public MainWindow()
     {
+        //will fix
         InitializeComponent();
-
-        MainFrame.Navigate(new SubjectsPage(storageService));
     }
 }

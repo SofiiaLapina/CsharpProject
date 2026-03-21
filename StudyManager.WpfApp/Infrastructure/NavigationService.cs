@@ -6,22 +6,33 @@ namespace StudyManager.WpfApp.Infrastructure;
 public sealed class NavigationService : INavigationService
 {
     private readonly Frame _frame;
+    private readonly Func<Guid, Page>? _subjectDetailsPageFactory;
+    private readonly Func<Guid, Page>? _lessonDetailsPageFactory;
 
-    public NavigationService(Frame frame)
+    public NavigationService(
+        Frame frame,
+        Func<Guid, Page>? subjectDetailsPageFactory = null,
+        Func<Guid, Page>? lessonDetailsPageFactory = null)
     {
         _frame = frame;
+        _subjectDetailsPageFactory = subjectDetailsPageFactory;
+        _lessonDetailsPageFactory = lessonDetailsPageFactory;
     }
 
     public void NavigateToSubjectDetails(Guid subjectId)
     {
-        // потом глянешь
-        throw new NotImplementedException("Wire SubjectDetailsPage navigation later");
+        if (_subjectDetailsPageFactory is null)
+            throw new InvalidOperationException("SubjectDetailsPage factory is not configured.");
+
+        _frame.Navigate(_subjectDetailsPageFactory(subjectId));
     }
 
     public void NavigateToLessonDetails(Guid lessonId)
     {
-        // не забудь
-        throw new NotImplementedException("Wire LessonDetailsPage navigation later");
+        if (_lessonDetailsPageFactory is null)
+            throw new InvalidOperationException("LessonDetailsPage factory is not configured.");
+
+        _frame.Navigate(_lessonDetailsPageFactory(lessonId));
     }
 
     public void GoBack()
