@@ -2,7 +2,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\StudyManager.Storage\StudyManager.Storage.csproj" />
-    <ProjectReference Include="..\StudyManager.Repositories\StudyManager.Repositories.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

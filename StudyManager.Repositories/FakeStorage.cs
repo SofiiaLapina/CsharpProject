@@ -1,6 +1,6 @@
 ﻿using StudyManager.Storage;
 
-namespace StudyManager.Services;
+namespace StudyManager.Repositories;
 
 internal static class FakeStorage
 {
