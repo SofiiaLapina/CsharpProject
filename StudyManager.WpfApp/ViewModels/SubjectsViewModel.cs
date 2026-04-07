@@ -11,9 +11,11 @@ public sealed class SubjectsViewModel : ViewModelBase
     private readonly ISubjectService _subjectService;
     private readonly INavigationService _navigation;
 
+    private SubjectListItemDto? _selectedSubject;
+    private bool _isBusy;
+
     public ObservableCollection<SubjectListItemDto> Subjects { get; } = new();
 
-    private SubjectListItemDto? _selectedSubject;
     public SubjectListItemDto? SelectedSubject
     {
         get => _selectedSubject;
@@ -25,7 +27,20 @@ public sealed class SubjectsViewModel : ViewModelBase
         }
     }
 
+    public bool IsBusy
+    {
+        get => _isBusy;
+        private set
+        {
+            _isBusy = value;
+            OnPropertyChanged();
+            OpenSubjectCommand.RaiseCanExecuteChanged();
+            LoadCommand.RaiseCanExecuteChanged();
+        }
+    }
+
     public RelayCommand OpenSubjectCommand { get; }
+    public AsyncRelayCommand LoadCommand { get; }
 
     public SubjectsViewModel(ISubjectService subjectService, INavigationService navigation)
     {
@@ -34,16 +49,35 @@ public sealed class SubjectsViewModel : ViewModelBase
 
         OpenSubjectCommand = new RelayCommand(
             execute: () => _navigation.NavigateToSubjectDetails(SelectedSubject!.Id),
-            canExecute: () => SelectedSubject is not null
-        );
+            canExecute: () => SelectedSubject is not null && !IsBusy);
 
-        Load();
+        LoadCommand = new AsyncRelayCommand(
+            execute: LoadAsync,
+            canExecute: () => !IsBusy);
     }
 
-    private void Load()
+    public async Task LoadAsync()
     {
-        Subjects.Clear();
-        foreach (var s in _subjectService.GetSubjects())
-            Subjects.Add(s);
+        if (IsBusy)
+        {
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            Subjects.Clear();
+
+            var subjects = await _subjectService.GetSubjectsAsync();
+
+            foreach (var subject in subjects)
+            {
+                Subjects.Add(subject);
+            }
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 }

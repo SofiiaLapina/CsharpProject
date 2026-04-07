@@ -1,34 +1,70 @@
 ﻿<Page x:Class="StudyManager.WpfApp.SubjectsPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d"
       Title="Subjects">
-    <Grid Margin="10">
+
+    <Page.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </Page.Resources>
+
+    <Grid Margin="12">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TextBlock Text="Subjects" FontSize="20" FontWeight="Bold" Margin="0,0,0,10"/>
+        <TextBlock Grid.Row="0"
+                   Text="Subjects"
+                   FontSize="24"
+                   FontWeight="Bold"
+                   Margin="0,0,0,12" />
 
         <ListBox Grid.Row="1"
                  ItemsSource="{Binding Subjects}"
-                 SelectedItem="{Binding SelectedSubject}">
+                 SelectedItem="{Binding SelectedSubject, Mode=TwoWay}"
+                 MouseDoubleClick="SubjectsListBox_MouseDoubleClick">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <StackPanel>
-                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
-                        <TextBlock Text="{Binding EctsCredits, StringFormat=ECTS: {0}}"/>
-                        <TextBlock Text="{Binding Area, StringFormat=Area: {0}}"/>
-                    </StackPanel>
+                    <Border Padding="6">
+                        <StackPanel>
+                            <TextBlock Text="{Binding Name}"
+                                       FontSize="16"
+                                       FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding Id, StringFormat=ID: {0}}" />
+                            <TextBlock Text="{Binding EctsCredits, StringFormat=ECTS: {0}}" />
+                            <TextBlock Text="{Binding Area, StringFormat=Area: {0}}" />
+                        </StackPanel>
+                    </Border>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
 
-        <Button Grid.Row="2"
-                Content="Details"
-                Height="32"
-                Margin="0,10,0,0"
-                Command="{Binding OpenSubjectCommand}"/>
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Left"
+                    Margin="0,12,0,0">
+            <Button Content="Details"
+                    Width="120"
+                    Command="{Binding OpenSubjectCommand}" />
+        </StackPanel>
+
+        <Border Grid.RowSpan="3"
+                Background="#80FFFFFF"
+                Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                <ProgressBar Width="220"
+                             Height="18"
+                             IsIndeterminate="True" />
+                <TextBlock Text="Loading..."
+                           Margin="0,10,0,0"
+                           HorizontalAlignment="Center"
+                           FontWeight="SemiBold" />
+            </StackPanel>
+        </Border>
     </Grid>
 </Page>
