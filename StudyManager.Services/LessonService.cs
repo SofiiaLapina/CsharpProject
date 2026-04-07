@@ -1,6 +1,7 @@
 using StudyManager.Repositories;
 using StudyManager.Services.Dtos.Lessons;
 using StudyManager.Services.Interfaces;
+using StudyManager.Storage;
 
 namespace StudyManager.Services;
 
@@ -41,7 +42,7 @@ public sealed class LessonService : ILessonService
             throw new InvalidOperationException($"Subject not found: {lesson.SubjectId}");
         }
 
-        var data = new StudyManager.Storage.LessonData(
+        var data = new LessonData(
             Guid.NewGuid(),
             lesson.SubjectId,
             lesson.Date,
@@ -85,7 +86,29 @@ public sealed class LessonService : ILessonService
         await _lessons.DeleteAsync(existing.Id, cancellationToken);
     }
 
-    private static LessonDetailsDto MapLessonDetails(StudyManager.Storage.LessonData lesson)
+    public async Task<LessonEditDto> GetLessonForEditAsync(Guid lessonId, CancellationToken cancellationToken = default)
+    {
+        var lesson = await _lessons.GetByIdAsync(lessonId, cancellationToken)
+            ?? throw new InvalidOperationException($"Lesson not found: {lessonId}");
+
+        return new LessonEditDto
+        {
+            Id = lesson.Id,
+            SubjectId = lesson.SubjectId,
+            Date = lesson.Date,
+            StartTime = lesson.StartTime,
+            EndTime = lesson.EndTime,
+            Topic = lesson.Topic,
+            Type = lesson.Type
+        };
+    }
+
+    public IReadOnlyList<LessonType> GetLessonTypes()
+    {
+        return Enum.GetValues<LessonType>();
+    }
+
+    private static LessonDetailsDto MapLessonDetails(LessonData lesson)
     {
         return new LessonDetailsDto
         {

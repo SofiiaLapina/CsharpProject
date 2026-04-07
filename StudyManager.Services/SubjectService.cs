@@ -95,6 +95,25 @@ public sealed class SubjectService : ISubjectService
         await _subjects.DeleteAsync(existing.Id, cancellationToken);
     }
 
+    public async Task<SubjectEditDto> GetSubjectForEditAsync(Guid subjectId, CancellationToken cancellationToken = default)
+    {
+        var subject = await _subjects.GetByIdAsync(subjectId, cancellationToken)
+            ?? throw new InvalidOperationException($"Subject not found: {subjectId}");
+
+        return new SubjectEditDto
+        {
+            Id = subject.Id,
+            Name = subject.Name,
+            EctsCredits = subject.EctsCredits,
+            Area = subject.Area
+        };
+    }
+
+    public IReadOnlyList<KnowledgeArea> GetKnowledgeAreas()
+    {
+        return Enum.GetValues<KnowledgeArea>();
+    }
+
     private static SubjectListItemDto MapSubjectListItem(SubjectData subject)
     {
         return new SubjectListItemDto

@@ -9,11 +9,17 @@ internal sealed class JsonStorage
         WriteIndented = true
     };
 
+    private static readonly SemaphoreSlim Gate = new(1, 1);
+
     private readonly string _filePath;
 
     public JsonStorage(string? filePath = null)
     {
-        var dataDirectory = Path.Combine(AppContext.BaseDirectory, "Data");
+        var dataDirectory = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "StudyManager",
+            "Data");
+
         Directory.CreateDirectory(dataDirectory);
 
         _filePath = filePath ?? Path.Combine(dataDirectory, "study-manager-storage.json");
@@ -27,6 +33,56 @@ internal sealed class JsonStorage
     }
 
     public async Task<StorageSnapshot> LoadAsync(CancellationToken cancellationToken = default)
+    {
+        await Gate.WaitAsync(cancellationToken).ConfigureAwait(false);
+
+        try
+        {
+            return await LoadUnsafeAsync(cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            Gate.Release();
+        }
+    }
+
+    public async Task SaveAsync(StorageSnapshot snapshot, CancellationToken cancellationToken = default)
+    {
+        await Gate.WaitAsync(cancellationToken).ConfigureAwait(false);
+
+        try
+        {
+            await SaveUnsafeAsync(snapshot, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            Gate.Release();
+        }
+    }
+
+    public async Task EnsureCreatedWithSeedAsync(
+        Func<StorageSnapshot> seedFactory,
+        CancellationToken cancellationToken = default)
+    {
+        await Gate.WaitAsync(cancellationToken).ConfigureAwait(false);
+
+        try
+        {
+            if (File.Exists(_filePath))
+            {
+                return;
+            }
+
+            var snapshot = seedFactory();
+            await SaveUnsafeAsync(snapshot, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            Gate.Release();
+        }
+    }
+
+    private async Task<StorageSnapshot> LoadUnsafeAsync(CancellationToken cancellationToken)
     {
         if (!File.Exists(_filePath))
         {
@@ -43,7 +99,7 @@ internal sealed class JsonStorage
         return snapshot ?? new StorageSnapshot();
     }
 
-    public async Task SaveAsync(StorageSnapshot snapshot, CancellationToken cancellationToken = default)
+    private async Task SaveUnsafeAsync(StorageSnapshot snapshot, CancellationToken cancellationToken)
     {
         var directory = Path.GetDirectoryName(_filePath);
         if (!string.IsNullOrWhiteSpace(directory))
@@ -60,18 +116,5 @@ internal sealed class JsonStorage
             cancellationToken).ConfigureAwait(false);
 
         await stream.FlushAsync(cancellationToken).ConfigureAwait(false);
-    }
-
-    public async Task EnsureCreatedWithSeedAsync(
-        Func<StorageSnapshot> seedFactory,
-        CancellationToken cancellationToken = default)
-    {
-        if (File.Exists(_filePath))
-        {
-            return;
-        }
-
-        var snapshot = seedFactory();
-        await SaveAsync(snapshot, cancellationToken).ConfigureAwait(false);
     }
 }
