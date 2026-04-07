@@ -1,26 +1,25 @@
-﻿using StudyManager.Storage;
+using StudyManager.Storage;
 
 namespace StudyManager.Repositories;
 
-internal static class FakeStorage
+internal static class SeedDataFactory
 {
-    internal static List<SubjectData> Subjects { get; } = new();
-    internal static List<LessonData> Lessons { get; } = new();
-
-    static FakeStorage()
+    internal static StorageSnapshot Create()
     {
+        var snapshot = new StorageSnapshot();
+
         var subject1 = new SubjectData(Guid.NewGuid(), "C# / .NET Basics", 6, KnowledgeArea.Programming);
         var subject2 = new SubjectData(Guid.NewGuid(), "Discrete Mathematics", 5, KnowledgeArea.Mathematics);
         var subject3 = new SubjectData(Guid.NewGuid(), "Software Engineering", 4, KnowledgeArea.Engineering);
 
-        Subjects.AddRange(new[]
+        snapshot.Subjects.AddRange(new[]
         {
             subject1,
             subject2,
             subject3
         });
 
-        Lessons.AddRange(new[]
+        snapshot.Lessons.AddRange(new[]
         {
             new LessonData(Guid.NewGuid(), subject1.Id, new DateOnly(2026, 2, 3),  new TimeOnly(9, 0),  new TimeOnly(10, 20), "C# syntax, types", LessonType.Lecture),
             new LessonData(Guid.NewGuid(), subject1.Id, new DateOnly(2026, 2, 5),  new TimeOnly(9, 0),  new TimeOnly(10, 20), "OOP basics", LessonType.Lecture),
@@ -36,5 +35,7 @@ internal static class FakeStorage
             new LessonData(Guid.NewGuid(), subject2.Id, new DateOnly(2026, 2, 4),  new TimeOnly(13, 0), new TimeOnly(14, 20), "Sets and relations", LessonType.Lecture),
             new LessonData(Guid.NewGuid(), subject2.Id, new DateOnly(2026, 2, 11), new TimeOnly(13, 0), new TimeOnly(14, 20), "Graphs basics", LessonType.Seminar)
         });
+
+        return snapshot;
     }
 }
