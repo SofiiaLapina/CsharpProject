@@ -13,6 +13,7 @@
     <Grid Margin="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
@@ -23,7 +24,46 @@
                    FontWeight="Bold"
                    Margin="0,0,0,12" />
 
-        <ListBox Grid.Row="1"
+        <Border Grid.Row="1"
+                BorderBrush="#DDDDDD"
+                BorderThickness="1"
+                Padding="10"
+                Margin="0,0,0,12">
+            <StackPanel>
+                <TextBlock Text="Add subject"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,10" />
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="120" />
+                        <ColumnDefinition Width="180" />
+                        <ColumnDefinition Width="120" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox Grid.Column="0"
+                             Margin="0,0,10,0"
+                             Text="{Binding NewSubjectName, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <TextBox Grid.Column="1"
+                             Margin="0,0,10,0"
+                             Text="{Binding NewSubjectEctsCredits, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <ComboBox Grid.Column="2"
+                              Margin="0,0,10,0"
+                              ItemsSource="{Binding KnowledgeAreas}"
+                              SelectedItem="{Binding SelectedKnowledgeArea, Mode=TwoWay}" />
+
+                    <Button Grid.Column="3"
+                            Content="Add"
+                            Command="{Binding CreateSubjectCommand}" />
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <ListBox Grid.Row="2"
                  ItemsSource="{Binding Subjects}"
                  SelectedItem="{Binding SelectedSubject, Mode=TwoWay}"
                  MouseDoubleClick="SubjectsListBox_MouseDoubleClick">
@@ -43,16 +83,20 @@
             </ListBox.ItemTemplate>
         </ListBox>
 
-        <StackPanel Grid.Row="2"
+        <StackPanel Grid.Row="3"
                     Orientation="Horizontal"
                     HorizontalAlignment="Left"
                     Margin="0,12,0,0">
             <Button Content="Details"
                     Width="120"
+                    Margin="0,0,12,0"
                     Command="{Binding OpenSubjectCommand}" />
+            <Button Content="Delete"
+                    Width="120"
+                    Command="{Binding DeleteSubjectCommand}" />
         </StackPanel>
 
-        <Border Grid.RowSpan="3"
+        <Border Grid.RowSpan="4"
                 Background="#80FFFFFF"
                 Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}">
             <StackPanel HorizontalAlignment="Center"
