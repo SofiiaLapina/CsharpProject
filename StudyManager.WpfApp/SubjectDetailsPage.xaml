@@ -22,43 +22,105 @@
             <TextBlock Text="{Binding Title}"
                        FontSize="24"
                        FontWeight="Bold" />
-            <TextBlock Text="{Binding EctsCreditsText}" Margin="0,8,0,0" />
-            <TextBlock Text="{Binding AreaText}" />
+            <TextBlock Text="{Binding SubjectIdText}" Margin="0,8,0,0" />
             <TextBlock Text="{Binding TotalDurationText}" HorizontalAlignment="Right" />
         </StackPanel>
 
-        <TextBlock Grid.Row="1"
-                   Text="Lessons"
-                   FontSize="18"
-                   FontWeight="SemiBold"
-                   Margin="0,0,0,8" />
+        <Border Grid.Row="1"
+                BorderBrush="#DDDDDD"
+                BorderThickness="1"
+                Padding="10"
+                Margin="0,0,0,12">
+            <StackPanel>
+                <TextBlock Text="Edit subject"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,10" />
 
-        <ListBox Grid.Row="2"
-                 ItemsSource="{Binding Lessons}"
-                 SelectedItem="{Binding SelectedLesson, Mode=TwoWay}"
-                 MouseDoubleClick="LessonsListBox_MouseDoubleClick">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <Border Padding="6">
-                        <StackPanel>
-                            <TextBlock Text="{Binding Topic}"
-                                       FontWeight="SemiBold" />
-                            <TextBlock Text="{Binding Date}" />
-                            <TextBlock>
-                                <Run Text="{Binding StartTime}" />
-                                <Run Text=" - " />
-                                <Run Text="{Binding EndTime}" />
-                                <Run Text="   [" />
-                                <Run Text="{Binding Type}" />
-                                <Run Text="] (" />
-                                <Run Text="{Binding Duration}" />
-                                <Run Text=")" />
-                            </TextBlock>
-                        </StackPanel>
-                    </Border>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="90" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="90" />
+                        <ColumnDefinition Width="120" />
+                        <ColumnDefinition Width="90" />
+                        <ColumnDefinition Width="180" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               VerticalAlignment="Center"
+                               Text="Name:" />
+                    <TextBox Grid.Column="1"
+                             Margin="6,0,12,0"
+                             Text="{Binding EditableName, UpdateSourceTrigger=PropertyChanged}"
+                             IsEnabled="{Binding IsEditMode}" />
+
+                    <TextBlock Grid.Column="2"
+                               VerticalAlignment="Center"
+                               Text="ECTS:" />
+                    <TextBox Grid.Column="3"
+                             Margin="6,0,12,0"
+                             Text="{Binding EditableEctsCredits, UpdateSourceTrigger=PropertyChanged}"
+                             IsEnabled="{Binding IsEditMode}" />
+
+                    <TextBlock Grid.Column="4"
+                               VerticalAlignment="Center"
+                               Text="Area:" />
+                    <ComboBox Grid.Column="5"
+                              Margin="6,0,0,0"
+                              ItemsSource="{Binding KnowledgeAreas}"
+                              SelectedItem="{Binding SelectedKnowledgeArea, Mode=TwoWay}"
+                              IsEnabled="{Binding IsEditMode}" />
+                </Grid>
+
+                <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                    <Button Content="Edit"
+                            Width="100"
+                            Margin="0,0,10,0"
+                            Command="{Binding EnableEditCommand}" />
+                    <Button Content="Save"
+                            Width="100"
+                            Margin="0,0,10,0"
+                            Command="{Binding SaveSubjectCommand}" />
+                    <Button Content="Cancel"
+                            Width="100"
+                            Command="{Binding CancelEditCommand}" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <StackPanel Grid.Row="2">
+            <TextBlock Text="Lessons"
+                       FontSize="18"
+                       FontWeight="SemiBold"
+                       Margin="0,0,0,8" />
+
+            <ListBox ItemsSource="{Binding Lessons}"
+                     SelectedItem="{Binding SelectedLesson, Mode=TwoWay}"
+                     MouseDoubleClick="LessonsListBox_MouseDoubleClick">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Border Padding="6">
+                            <StackPanel>
+                                <TextBlock Text="{Binding Topic}"
+                                           FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding Date}" />
+                                <TextBlock>
+                                    <Run Text="{Binding StartTime}" />
+                                    <Run Text=" - " />
+                                    <Run Text="{Binding EndTime}" />
+                                    <Run Text="   [" />
+                                    <Run Text="{Binding Type}" />
+                                    <Run Text="] (" />
+                                    <Run Text="{Binding Duration}" />
+                                    <Run Text=")" />
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </StackPanel>
 
         <StackPanel Grid.Row="3"
                     Orientation="Horizontal"

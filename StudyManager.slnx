@@ -1,5 +1,4 @@
 <Solution>
-  <Project Path="StudyManager.Presentation/StudyManager.Presentation.csproj" />
   <Project Path="StudyManager.Repositories/StudyManager.Repositories.csproj" />
   <Project Path="StudyManager.Services/StudyManager.Services.csproj" />
   <Project Path="StudyManager.Storage/StudyManager.Storage.csproj" />
