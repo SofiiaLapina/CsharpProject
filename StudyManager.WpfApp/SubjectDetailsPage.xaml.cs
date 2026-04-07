@@ -1,7 +1,7 @@
-﻿using System.Windows.Controls;
-using StudyManager.WpfApp.ViewModels;
+﻿using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows;
+using StudyManager.WpfApp.ViewModels;
 
 namespace StudyManager.WpfApp;
 
@@ -19,7 +19,6 @@ public partial class SubjectDetailsPage : Page
 
     private async void SubjectDetailsPage_Loaded(object sender, RoutedEventArgs e)
     {
-        Loaded -= SubjectDetailsPage_Loaded;
         await _viewModel.LoadAsync();
     }
 

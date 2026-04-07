@@ -12,11 +12,13 @@
 
     <Grid Margin="12">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0">
+        <StackPanel Grid.Row="0" Margin="0,0,0,12">
             <TextBlock Text="{Binding Title}"
                        FontSize="24"
                        FontWeight="Bold"
@@ -30,7 +32,95 @@
             <TextBlock Text="{Binding DurationText}" Margin="0,0,0,6" />
         </StackPanel>
 
-        <StackPanel Grid.Row="1"
+        <Border Grid.Row="1"
+                BorderBrush="#DDDDDD"
+                BorderThickness="1"
+                Padding="10"
+                Margin="0,0,0,12">
+            <StackPanel>
+                <TextBlock Text="Edit lesson"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,10" />
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="70" />
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="55" />
+                        <ColumnDefinition Width="120" />
+                        <ColumnDefinition Width="55" />
+                        <ColumnDefinition Width="90" />
+                        <ColumnDefinition Width="45" />
+                        <ColumnDefinition Width="90" />
+                        <ColumnDefinition Width="55" />
+                        <ColumnDefinition Width="160" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               VerticalAlignment="Center"
+                               Text="Topic:" />
+                    <TextBox Grid.Column="1"
+                             Margin="6,0,12,0"
+                             Text="{Binding EditableTopic, UpdateSourceTrigger=PropertyChanged}"
+                             IsEnabled="{Binding IsEditMode}" />
+
+                    <TextBlock Grid.Column="2"
+                               VerticalAlignment="Center"
+                               Text="Date:" />
+                    <TextBox Grid.Column="3"
+                             Margin="6,0,12,0"
+                             Text="{Binding EditableDate, UpdateSourceTrigger=PropertyChanged}"
+                             ToolTip="Example: 2026-04-08"
+                             IsEnabled="{Binding IsEditMode}" />
+
+                    <TextBlock Grid.Column="4"
+                               VerticalAlignment="Center"
+                               Text="Start:" />
+                    <TextBox Grid.Column="5"
+                             Margin="6,0,12,0"
+                             Text="{Binding EditableStartTime, UpdateSourceTrigger=PropertyChanged}"
+                             ToolTip="Example: 09:00"
+                             IsEnabled="{Binding IsEditMode}" />
+
+                    <TextBlock Grid.Column="6"
+                               VerticalAlignment="Center"
+                               Text="End:" />
+                    <TextBox Grid.Column="7"
+                             Margin="6,0,12,0"
+                             Text="{Binding EditableEndTime, UpdateSourceTrigger=PropertyChanged}"
+                             ToolTip="Example: 10:20"
+                             IsEnabled="{Binding IsEditMode}" />
+
+                    <TextBlock Grid.Column="8"
+                               VerticalAlignment="Center"
+                               Text="Type:" />
+                    <ComboBox Grid.Column="9"
+                              Margin="6,0,0,0"
+                              ItemsSource="{Binding LessonTypes}"
+                              SelectedItem="{Binding SelectedLessonType, Mode=TwoWay}"
+                              IsEnabled="{Binding IsEditMode}" />
+                </Grid>
+
+                <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                    <Button Content="Edit"
+                            Width="100"
+                            Margin="0,0,10,0"
+                            Command="{Binding EnableEditCommand}" />
+                    <Button Content="Save"
+                            Width="100"
+                            Margin="0,0,10,0"
+                            Command="{Binding SaveLessonCommand}" />
+                    <Button Content="Cancel"
+                            Width="100"
+                            Command="{Binding CancelEditCommand}" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="2" />
+
+        <StackPanel Grid.Row="3"
                     Orientation="Horizontal"
                     HorizontalAlignment="Left"
                     Margin="0,12,0,0">
@@ -39,7 +129,7 @@
                     Command="{Binding GoBackCommand}" />
         </StackPanel>
 
-        <Border Grid.RowSpan="2"
+        <Border Grid.RowSpan="4"
                 Background="#80FFFFFF"
                 Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}">
             <StackPanel HorizontalAlignment="Center"

@@ -12,7 +12,9 @@ public sealed class SubjectDetailsViewModel : ViewModelBase
 {
     private readonly Guid _subjectId;
     private readonly ISubjectService _subjectService;
+    private readonly ILessonService _lessonService;
     private readonly INavigationService _navigation;
+    private readonly List<LessonListItemDto> _allLessons = new();
 
     private SubjectDetailsDto? _subject;
     private LessonListItemDto? _selectedLesson;
@@ -21,6 +23,15 @@ public sealed class SubjectDetailsViewModel : ViewModelBase
     private string _editableName = string.Empty;
     private string _editableEctsCredits = string.Empty;
     private KnowledgeArea _selectedKnowledgeArea;
+
+    private string _newLessonTopic = string.Empty;
+    private string _newLessonDate = string.Empty;
+    private string _newLessonStartTime = string.Empty;
+    private string _newLessonEndTime = string.Empty;
+    private LessonType _selectedLessonType;
+
+    private string _lessonSearchText = string.Empty;
+    private string _selectedLessonSortOption = "Date Desc";
 
     public SubjectDetailsDto? Subject
     {
@@ -32,6 +43,13 @@ public sealed class SubjectDetailsViewModel : ViewModelBase
             OnPropertyChanged(nameof(Title));
             OnPropertyChanged(nameof(SubjectIdText));
             OnPropertyChanged(nameof(TotalDurationText));
+
+            OpenLessonCommand.RaiseCanExecuteChanged();
+            EnableEditCommand.RaiseCanExecuteChanged();
+            CancelEditCommand.RaiseCanExecuteChanged();
+            SaveSubjectCommand.RaiseCanExecuteChanged();
+            AddLessonCommand.RaiseCanExecuteChanged();
+            DeleteLessonCommand.RaiseCanExecuteChanged();
         }
     }
 
@@ -43,11 +61,24 @@ public sealed class SubjectDetailsViewModel : ViewModelBase
             _selectedLesson = value;
             OnPropertyChanged();
             OpenLessonCommand.RaiseCanExecuteChanged();
+            DeleteLessonCommand.RaiseCanExecuteChanged();
         }
     }
 
     public ObservableCollection<LessonListItemDto> Lessons { get; } = new();
     public ObservableCollection<KnowledgeArea> KnowledgeAreas { get; } = new();
+    public ObservableCollection<LessonType> LessonTypes { get; } = new();
+    public ObservableCollection<string> LessonSortOptions { get; } = new()
+    {
+        "Date Desc",
+        "Date Asc",
+        "Topic A-Z",
+        "Topic Z-A",
+        "Duration Asc",
+        "Duration Desc",
+        "Type A-Z",
+        "Type Z-A"
+    };
 
     public bool IsBusy
     {
@@ -62,6 +93,8 @@ public sealed class SubjectDetailsViewModel : ViewModelBase
             EnableEditCommand.RaiseCanExecuteChanged();
             CancelEditCommand.RaiseCanExecuteChanged();
             SaveSubjectCommand.RaiseCanExecuteChanged();
+            AddLessonCommand.RaiseCanExecuteChanged();
+            DeleteLessonCommand.RaiseCanExecuteChanged();
         }
     }
 
@@ -111,6 +144,83 @@ public sealed class SubjectDetailsViewModel : ViewModelBase
         }
     }
 
+    public string NewLessonTopic
+    {
+        get => _newLessonTopic;
+        set
+        {
+            _newLessonTopic = value;
+            OnPropertyChanged();
+            AddLessonCommand.RaiseCanExecuteChanged();
+        }
+    }
+
+    public string NewLessonDate
+    {
+        get => _newLessonDate;
+        set
+        {
+            _newLessonDate = value;
+            OnPropertyChanged();
+            AddLessonCommand.RaiseCanExecuteChanged();
+        }
+    }
+
+    public string NewLessonStartTime
+    {
+        get => _newLessonStartTime;
+        set
+        {
+            _newLessonStartTime = value;
+            OnPropertyChanged();
+            AddLessonCommand.RaiseCanExecuteChanged();
+        }
+    }
+
+    public string NewLessonEndTime
+    {
+        get => _newLessonEndTime;
+        set
+        {
+            _newLessonEndTime = value;
+            OnPropertyChanged();
+            AddLessonCommand.RaiseCanExecuteChanged();
+        }
+    }
+
+    public LessonType SelectedLessonType
+    {
+        get => _selectedLessonType;
+        set
+        {
+            _selectedLessonType = value;
+            OnPropertyChanged();
+            AddLessonCommand.RaiseCanExecuteChanged();
+        }
+    }
+
+    public string LessonSearchText
+    {
+        get => _lessonSearchText;
+        set
+        {
+            _lessonSearchText = value;
+            OnPropertyChanged();
+            ApplyLessonsView();
+        }
+    }
+
+    public string SelectedLessonSortOption
+    {
+        get => _selectedLessonSortOption;
+        set
+        {
+            _selectedLessonSortOption = value;
+            OnPropertyChanged();
+            ApplyLessonsView();
+        }
+    }
+
     public string Title => Subject?.Name ?? string.Empty;
     public string SubjectIdText => Subject is null ? string.Empty : $"Id: {Subject.Id}";
     public string TotalDurationText => Subject is null ? string.Empty : $"Total: {Subject.TotalDuration:hh\\:mm\\:ss}";
@@ -120,15 +230,19 @@ public sealed class SubjectDetailsViewModel : ViewModelBase
     public RelayCommand EnableEditCommand { get; }
     public RelayCommand CancelEditCommand { get; }
     public AsyncRelayCommand SaveSubjectCommand { get; }
+    public AsyncRelayCommand AddLessonCommand { get; }
+    public AsyncRelayCommand DeleteLessonCommand { get; }
     public AsyncRelayCommand LoadCommand { get; }
 
     public SubjectDetailsViewModel(
         Guid subjectId,
         ISubjectService subjectService,
+        ILessonService lessonService,
         INavigationService navigation)
     {
         _subjectId = subjectId;
         _subjectService = subjectService;
+        _lessonService = lessonService;
         _navigation = navigation;
 
         foreach (var area in _subjectService.GetKnowledgeAreas())
@@ -139,6 +253,16 @@ public sealed class SubjectDetailsViewModel : ViewModelBase
         if (KnowledgeAreas.Count > 0)
         {
             _selectedKnowledgeArea = KnowledgeAreas[0];
+        }
+
+        foreach (var lessonType in _lessonService.GetLessonTypes())
+        {
+            LessonTypes.Add(lessonType);
+        }
+
+        if (LessonTypes.Count > 0)
+        {
+            _selectedLessonType = LessonTypes[0];
         }
 
         OpenLessonCommand = new RelayCommand(
@@ -161,6 +285,14 @@ public sealed class SubjectDetailsViewModel : ViewModelBase
             execute: SaveSubjectAsync,
             canExecute: () => Subject is not null && !IsBusy && IsEditMode);
 
+        AddLessonCommand = new AsyncRelayCommand(
+            execute: AddLessonAsync,
+            canExecute: () => Subject is not null && !IsBusy);
+
+        DeleteLessonCommand = new AsyncRelayCommand(
+            execute: DeleteSelectedLessonAsync,
+            canExecute: () => SelectedLesson is not null && !IsBusy);
+
         LoadCommand = new AsyncRelayCommand(
             execute: LoadAsync,
             canExecute: () => !IsBusy);
@@ -176,13 +308,7 @@ public sealed class SubjectDetailsViewModel : ViewModelBase
         try
         {
             IsBusy = true;
-
-            var subject = await _subjectService.GetSubjectDetailsAsync(_subjectId);
-            var subjectForEdit = await _subjectService.GetSubjectForEditAsync(_subjectId);
-
-            ApplySubject(subject);
-            ApplyEditableSubject(subjectForEdit);
-
+            await RefreshSubjectAsync();
             IsEditMode = false;
         }
         finally
@@ -232,7 +358,6 @@ public sealed class SubjectDetailsViewModel : ViewModelBase
                 });
 
             ApplySubject(updated);
-
             EditableName = updated.Name;
             EditableEctsCredits = updated.EctsCredits.ToString();
             SelectedKnowledgeArea = updated.Area;
@@ -244,6 +369,131 @@ public sealed class SubjectDetailsViewModel : ViewModelBase
             MessageBox.Show(
                 ex.Message,
                 "Save error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private async Task AddLessonAsync()
+    {
+        if (Subject is null || IsBusy)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(NewLessonTopic))
+        {
+            MessageBox.Show(
+                "Lesson topic is required.",
+                "Validation error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+            return;
+        }
+
+        if (!DateOnly.TryParse(NewLessonDate, out var date))
+        {
+            MessageBox.Show(
+                "Date must be valid.",
+                "Validation error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+            return;
+        }
+
+        if (!TimeOnly.TryParse(NewLessonStartTime, out var startTime))
+        {
+            MessageBox.Show(
+                "Start time must be valid.",
+                "Validation error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+            return;
+        }
+
+        if (!TimeOnly.TryParse(NewLessonEndTime, out var endTime))
+        {
+            MessageBox.Show(
+                "End time must be valid.",
+                "Validation error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+
+            await _lessonService.CreateLessonAsync(new UpsertLessonDto
+            {
+                SubjectId = Subject.Id,
+                Date = date,
+                StartTime = startTime,
+                EndTime = endTime,
+                Topic = NewLessonTopic.Trim(),
+                Type = SelectedLessonType
+            });
+
+            NewLessonTopic = string.Empty;
+            NewLessonDate = string.Empty;
+            NewLessonStartTime = string.Empty;
+            NewLessonEndTime = string.Empty;
+
+            await RefreshSubjectAsync();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                ex.Message,
+                "Add lesson error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private async Task DeleteSelectedLessonAsync()
+    {
+        if (SelectedLesson is null || IsBusy)
+        {
+            return;
+        }
+
+        var lesson = SelectedLesson;
+
+        var answer = MessageBox.Show(
+            $"Delete lesson '{lesson.Topic}'?",
+            "Confirm delete",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+        if (answer != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+
+            await _lessonService.DeleteLessonAsync(lesson.Id);
+            SelectedLesson = null;
+
+            await RefreshSubjectAsync();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                ex.Message,
+                "Delete lesson error",
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
         }
@@ -266,15 +516,23 @@ public sealed class SubjectDetailsViewModel : ViewModelBase
         IsEditMode = false;
     }
 
+    private async Task RefreshSubjectAsync()
+    {
+        var subject = await _subjectService.GetSubjectDetailsAsync(_subjectId);
+        var subjectForEdit = await _subjectService.GetSubjectForEditAsync(_subjectId);
+
+        ApplySubject(subject);
+        ApplyEditableSubject(subjectForEdit);
+    }
+
     private void ApplySubject(SubjectDetailsDto subject)
     {
         Subject = subject;
 
-        Lessons.Clear();
-        foreach (var lesson in subject.Lessons)
-        {
-            Lessons.Add(lesson);
-        }
+        _allLessons.Clear();
+        _allLessons.AddRange(subject.Lessons);
+
+        ApplyLessonsView();
     }
 
     private void ApplyEditableSubject(SubjectEditDto subject)
@@ -282,5 +540,44 @@ public sealed class SubjectDetailsViewModel : ViewModelBase
         EditableName = subject.Name;
         EditableEctsCredits = subject.EctsCredits.ToString();
         SelectedKnowledgeArea = subject.Area;
+    }
+
+    private void ApplyLessonsView()
+    {
+        IEnumerable<LessonListItemDto> query = _allLessons;
+
+        if (!string.IsNullOrWhiteSpace(LessonSearchText))
+        {
+            var term = LessonSearchText.Trim();
+            query = query.Where(l =>
+                l.Topic.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                l.Type.ToString().Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                l.Date.ToString().Contains(term, StringComparison.OrdinalIgnoreCase));
+        }
+
+        query = SelectedLessonSortOption switch
+        {
+            "Date Asc" => query.OrderBy(l => l.Date).ThenBy(l => l.StartTime),
+            "Topic A-Z" => query.OrderBy(l => l.Topic),
+            "Topic Z-A" => query.OrderByDescending(l => l.Topic),
+            "Duration Asc" => query.OrderBy(l => l.Duration).ThenBy(l => l.Topic),
+            "Duration Desc" => query.OrderByDescending(l => l.Duration).ThenBy(l => l.Topic),
+            "Type A-Z" => query.OrderBy(l => l.Type.ToString()).ThenBy(l => l.Topic),
+            "Type Z-A" => query.OrderByDescending(l => l.Type.ToString()).ThenBy(l => l.Topic),
+            _ => query.OrderByDescending(l => l.Date).ThenByDescending(l => l.StartTime)
+        };
+
+        var selectedId = SelectedLesson?.Id;
+
+        Lessons.Clear();
+        foreach (var lesson in query)
+        {
+            Lessons.Add(lesson);
+        }
+
+        if (selectedId is not null)
+        {
+            SelectedLesson = Lessons.FirstOrDefault(l => l.Id == selectedId.Value);
+        }
     }
 }

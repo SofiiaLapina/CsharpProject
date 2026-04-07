@@ -14,6 +14,8 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
@@ -89,7 +91,109 @@
             </StackPanel>
         </Border>
 
-        <StackPanel Grid.Row="2">
+        <Border Grid.Row="2"
+                BorderBrush="#DDDDDD"
+                BorderThickness="1"
+                Padding="10"
+                Margin="0,0,0,12">
+            <StackPanel>
+                <TextBlock Text="Add lesson"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,10" />
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="70" />
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="55" />
+                        <ColumnDefinition Width="120" />
+                        <ColumnDefinition Width="55" />
+                        <ColumnDefinition Width="90" />
+                        <ColumnDefinition Width="45" />
+                        <ColumnDefinition Width="90" />
+                        <ColumnDefinition Width="55" />
+                        <ColumnDefinition Width="160" />
+                        <ColumnDefinition Width="120" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               VerticalAlignment="Center"
+                               Text="Topic:" />
+                    <TextBox Grid.Column="1"
+                             Margin="6,0,12,0"
+                             Text="{Binding NewLessonTopic, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <TextBlock Grid.Column="2"
+                               VerticalAlignment="Center"
+                               Text="Date:" />
+                    <TextBox Grid.Column="3"
+                             Margin="6,0,12,0"
+                             Text="{Binding NewLessonDate, UpdateSourceTrigger=PropertyChanged}"
+                             ToolTip="Example: 2026-04-08" />
+
+                    <TextBlock Grid.Column="4"
+                               VerticalAlignment="Center"
+                               Text="Start:" />
+                    <TextBox Grid.Column="5"
+                             Margin="6,0,12,0"
+                             Text="{Binding NewLessonStartTime, UpdateSourceTrigger=PropertyChanged}"
+                             ToolTip="Example: 09:00" />
+
+                    <TextBlock Grid.Column="6"
+                               VerticalAlignment="Center"
+                               Text="End:" />
+                    <TextBox Grid.Column="7"
+                             Margin="6,0,12,0"
+                             Text="{Binding NewLessonEndTime, UpdateSourceTrigger=PropertyChanged}"
+                             ToolTip="Example: 10:20" />
+
+                    <TextBlock Grid.Column="8"
+                               VerticalAlignment="Center"
+                               Text="Type:" />
+                    <ComboBox Grid.Column="9"
+                              Margin="6,0,12,0"
+                              ItemsSource="{Binding LessonTypes}"
+                              SelectedItem="{Binding SelectedLessonType, Mode=TwoWay}" />
+
+                    <Button Grid.Column="10"
+                            Content="Add lesson"
+                            Command="{Binding AddLessonCommand}" />
+                </Grid>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="3"
+                BorderBrush="#DDDDDD"
+                BorderThickness="1"
+                Padding="10"
+                Margin="0,0,0,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="70" />
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="60" />
+                    <ColumnDefinition Width="180" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0"
+                           VerticalAlignment="Center"
+                           Text="Search:" />
+                <TextBox Grid.Column="1"
+                         Margin="6,0,12,0"
+                         Text="{Binding LessonSearchText, UpdateSourceTrigger=PropertyChanged}" />
+
+                <TextBlock Grid.Column="2"
+                           VerticalAlignment="Center"
+                           Text="Sort:" />
+                <ComboBox Grid.Column="3"
+                          Margin="6,0,0,0"
+                          ItemsSource="{Binding LessonSortOptions}"
+                          SelectedItem="{Binding SelectedLessonSortOption, Mode=TwoWay}" />
+            </Grid>
+        </Border>
+
+        <StackPanel Grid.Row="4">
             <TextBlock Text="Lessons"
                        FontSize="18"
                        FontWeight="SemiBold"
@@ -122,7 +226,7 @@
             </ListBox>
         </StackPanel>
 
-        <StackPanel Grid.Row="3"
+        <StackPanel Grid.Row="5"
                     Orientation="Horizontal"
                     HorizontalAlignment="Left"
                     Margin="0,12,0,0">
@@ -130,12 +234,16 @@
                     Width="120"
                     Margin="0,0,12,0"
                     Command="{Binding OpenLessonCommand}" />
+            <Button Content="Delete lesson"
+                    Width="120"
+                    Margin="0,0,12,0"
+                    Command="{Binding DeleteLessonCommand}" />
             <Button Content="Back"
                     Width="120"
                     Command="{Binding GoBackCommand}" />
         </StackPanel>
 
-        <Border Grid.RowSpan="4"
+        <Border Grid.RowSpan="6"
                 Background="#80FFFFFF"
                 Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}">
             <StackPanel HorizontalAlignment="Center"

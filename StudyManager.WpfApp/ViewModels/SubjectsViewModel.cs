@@ -11,15 +11,25 @@ public sealed class SubjectsViewModel : ViewModelBase
 {
     private readonly ISubjectService _subjectService;
     private readonly INavigationService _navigation;
+    private readonly List<SubjectListItemDto> _allSubjects = new();
 
     private SubjectListItemDto? _selectedSubject;
     private bool _isBusy;
     private string _newSubjectName = string.Empty;
     private string _newSubjectEctsCredits = string.Empty;
     private KnowledgeArea _selectedKnowledgeArea;
+    private string _searchText = string.Empty;
+    private string _selectedSortOption = "Name A-Z";
 
     public ObservableCollection<SubjectListItemDto> Subjects { get; } = new();
     public ObservableCollection<KnowledgeArea> KnowledgeAreas { get; } = new();
+    public ObservableCollection<string> SortOptions { get; } = new()
+    {
+        "Name A-Z",
+        "Name Z-A",
+        "ECTS Asc",
+        "ECTS Desc"
+    };
 
     public SubjectListItemDto? SelectedSubject
     {
@@ -80,6 +90,28 @@ public sealed class SubjectsViewModel : ViewModelBase
         }
     }
 
+    public string SearchText
+    {
+        get => _searchText;
+        set
+        {
+            _searchText = value;
+            OnPropertyChanged();
+            ApplySubjectView();
+        }
+    }
+
+    public string SelectedSortOption
+    {
+        get => _selectedSortOption;
+        set
+        {
+            _selectedSortOption = value;
+            OnPropertyChanged();
+            ApplySubjectView();
+        }
+    }
+
     public RelayCommand OpenSubjectCommand { get; }
     public AsyncRelayCommand DeleteSubjectCommand { get; }
     public AsyncRelayCommand CreateSubjectCommand { get; }
@@ -127,15 +159,14 @@ public sealed class SubjectsViewModel : ViewModelBase
         try
         {
             IsBusy = true;
-            Subjects.Clear();
             SelectedSubject = null;
 
             var subjects = await _subjectService.GetSubjectsAsync();
 
-            foreach (var subject in subjects)
-            {
-                Subjects.Add(subject);
-            }
+            _allSubjects.Clear();
+            _allSubjects.AddRange(subjects);
+
+            ApplySubjectView();
         }
         finally
         {
@@ -181,19 +212,19 @@ public sealed class SubjectsViewModel : ViewModelBase
                 Area = SelectedKnowledgeArea
             });
 
-            var listItem = new SubjectListItemDto
+            _allSubjects.Add(new SubjectListItemDto
             {
                 Id = createdSubject.Id,
                 Name = createdSubject.Name,
                 EctsCredits = createdSubject.EctsCredits,
                 Area = createdSubject.Area
-            };
-
-            Subjects.Add(listItem);
-            SelectedSubject = listItem;
+            });
 
             NewSubjectName = string.Empty;
             NewSubjectEctsCredits = string.Empty;
+
+            ApplySubjectView();
+            SelectedSubject = Subjects.FirstOrDefault(s => s.Id == createdSubject.Id);
         }
         catch (Exception ex)
         {
@@ -235,8 +266,9 @@ public sealed class SubjectsViewModel : ViewModelBase
 
             await _subjectService.DeleteSubjectAsync(subject.Id);
 
-            Subjects.Remove(subject);
+            _allSubjects.RemoveAll(s => s.Id == subject.Id);
             SelectedSubject = null;
+            ApplySubjectView();
         }
         catch (Exception ex)
         {
@@ -249,6 +281,40 @@ public sealed class SubjectsViewModel : ViewModelBase
         finally
         {
             IsBusy = false;
+        }
+    }
+
+    private void ApplySubjectView()
+    {
+        IEnumerable<SubjectListItemDto> query = _allSubjects;
+
+        if (!string.IsNullOrWhiteSpace(SearchText))
+        {
+            var term = SearchText.Trim();
+            query = query.Where(s =>
+                s.Name.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                s.Area.ToString().Contains(term, StringComparison.OrdinalIgnoreCase));
+        }
+
+        query = SelectedSortOption switch
+        {
+            "Name Z-A" => query.OrderByDescending(s => s.Name),
+            "ECTS Asc" => query.OrderBy(s => s.EctsCredits).ThenBy(s => s.Name),
+            "ECTS Desc" => query.OrderByDescending(s => s.EctsCredits).ThenBy(s => s.Name),
+            _ => query.OrderBy(s => s.Name)
+        };
+
+        var selectedId = SelectedSubject?.Id;
+
+        Subjects.Clear();
+        foreach (var subject in query)
+        {
+            Subjects.Add(subject);
+        }
+
+        if (selectedId is not null)
+        {
+            SelectedSubject = Subjects.FirstOrDefault(s => s.Id == selectedId.Value);
         }
     }
 }

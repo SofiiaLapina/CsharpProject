@@ -14,6 +14,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
@@ -37,33 +38,75 @@
 
                 <Grid>
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="70" />
                         <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="55" />
                         <ColumnDefinition Width="120" />
+                        <ColumnDefinition Width="55" />
                         <ColumnDefinition Width="180" />
                         <ColumnDefinition Width="120" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBox Grid.Column="0"
-                             Margin="0,0,10,0"
+                    <TextBlock Grid.Column="0"
+                               VerticalAlignment="Center"
+                               Text="Name:" />
+                    <TextBox Grid.Column="1"
+                             Margin="6,0,12,0"
                              Text="{Binding NewSubjectName, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <TextBox Grid.Column="1"
-                             Margin="0,0,10,0"
+                    <TextBlock Grid.Column="2"
+                               VerticalAlignment="Center"
+                               Text="ECTS:" />
+                    <TextBox Grid.Column="3"
+                             Margin="6,0,12,0"
                              Text="{Binding NewSubjectEctsCredits, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <ComboBox Grid.Column="2"
-                              Margin="0,0,10,0"
+                    <TextBlock Grid.Column="4"
+                               VerticalAlignment="Center"
+                               Text="Area:" />
+                    <ComboBox Grid.Column="5"
+                              Margin="6,0,12,0"
                               ItemsSource="{Binding KnowledgeAreas}"
                               SelectedItem="{Binding SelectedKnowledgeArea, Mode=TwoWay}" />
 
-                    <Button Grid.Column="3"
+                    <Button Grid.Column="6"
                             Content="Add"
                             Command="{Binding CreateSubjectCommand}" />
                 </Grid>
             </StackPanel>
         </Border>
 
-        <ListBox Grid.Row="2"
+        <Border Grid.Row="2"
+                BorderBrush="#DDDDDD"
+                BorderThickness="1"
+                Padding="10"
+                Margin="0,0,0,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="70" />
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="60" />
+                    <ColumnDefinition Width="180" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0"
+                           VerticalAlignment="Center"
+                           Text="Search:" />
+                <TextBox Grid.Column="1"
+                         Margin="6,0,12,0"
+                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+
+                <TextBlock Grid.Column="2"
+                           VerticalAlignment="Center"
+                           Text="Sort:" />
+                <ComboBox Grid.Column="3"
+                          Margin="6,0,0,0"
+                          ItemsSource="{Binding SortOptions}"
+                          SelectedItem="{Binding SelectedSortOption, Mode=TwoWay}" />
+            </Grid>
+        </Border>
+
+        <ListBox Grid.Row="3"
                  ItemsSource="{Binding Subjects}"
                  SelectedItem="{Binding SelectedSubject, Mode=TwoWay}"
                  MouseDoubleClick="SubjectsListBox_MouseDoubleClick">
@@ -83,7 +126,7 @@
             </ListBox.ItemTemplate>
         </ListBox>
 
-        <StackPanel Grid.Row="3"
+        <StackPanel Grid.Row="4"
                     Orientation="Horizontal"
                     HorizontalAlignment="Left"
                     Margin="0,12,0,0">
@@ -96,7 +139,7 @@
                     Command="{Binding DeleteSubjectCommand}" />
         </StackPanel>
 
-        <Border Grid.RowSpan="4"
+        <Border Grid.RowSpan="5"
                 Background="#80FFFFFF"
                 Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}">
             <StackPanel HorizontalAlignment="Center"
