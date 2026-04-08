@@ -193,15 +193,23 @@
             </Grid>
         </Border>
 
-        <StackPanel Grid.Row="4">
-            <TextBlock Text="Lessons"
+        <Grid Grid.Row="4">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0"
+                       Text="Lessons"
                        FontSize="18"
                        FontWeight="SemiBold"
                        Margin="0,0,0,8" />
 
-            <ListBox ItemsSource="{Binding Lessons}"
+            <ListBox Grid.Row="1"
+                     ItemsSource="{Binding Lessons}"
                      SelectedItem="{Binding SelectedLesson, Mode=TwoWay}"
-                     MouseDoubleClick="LessonsListBox_MouseDoubleClick">
+                     MouseDoubleClick="LessonsListBox_MouseDoubleClick"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Border Padding="6">
@@ -224,7 +232,7 @@
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
-        </StackPanel>
+        </Grid>
 
         <StackPanel Grid.Row="5"
                     Orientation="Horizontal"
